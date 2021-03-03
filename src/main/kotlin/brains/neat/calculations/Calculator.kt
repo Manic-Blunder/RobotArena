@@ -37,7 +37,7 @@ class Calculator(genome: Genome) {
     }
 
     fun calculate(inputs: List<Double>): List<Double> {
-        (inputNodes zip inputs).forEach { it.first.output = sigmoid(it.second) }
+        (inputNodes zip inputs).forEach { it.first.output = it.second }
         hiddenNodes.forEach { it.recalculate() }
         return outputNodes.map(Node::recalculate)
     }

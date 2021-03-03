@@ -6,6 +6,7 @@ object GameFrame : JFrame("RoboWar!") {
         defaultCloseOperation = EXIT_ON_CLOSE
         isLocationByPlatform = true
         isVisible = true
+        isResizable = false
         contentPane.addMouseListener(InputHandler)
         addKeyListener(InputHandler)
         contentPane.add(GameScreen)

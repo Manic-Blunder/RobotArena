@@ -97,7 +97,7 @@ abstract class Dood(val arena: Arena, override var position: Vector2, val team: 
                         (position.x + 27 * cos(angle + 12 * PI / 180)),
                         (position.y + 27 * sin(angle + 12 * PI / 180))
                     ),
-                    Vector2.fromPolar(10.0, angle + (Math.random() * 0.1 - 0.05) + (Math.random() * (dizziness * 0.1) - (dizziness * 0.05)))
+                    Vector2.fromPolar(3.0, angle + (Math.random() * 0.1 - 0.05) + (Math.random() * (dizziness * 0.1) - (dizziness * 0.05)))
                 )
             )
             fireCooldownRemaining = fireCooldown
@@ -175,7 +175,9 @@ abstract class Dood(val arena: Arena, override var position: Vector2, val team: 
             Team.ZOONER -> Color(85, 15, 205)
         }
 
-        g.fillOval((position.x - radius / 2).toInt(), (position.y - radius / 2).toInt(), radius.toInt(), radius.toInt())
+        val dotRadius = 8
+
+        g.fillOval((position.x - dotRadius).toInt(), (position.y - dotRadius + 1).toInt(), dotRadius * 2, dotRadius * 2)
     }
 
     private fun rotateImage(image: BufferedImage, angle: Double): BufferedImage {
