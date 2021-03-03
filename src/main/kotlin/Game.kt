@@ -9,7 +9,7 @@ fun main() {
     val maxGenomes = 120
 
     val neats = listOf(team1.newNeat(maxGenomes, 20), team2.newNeat(maxGenomes, 20))
-//    neats.forEach { it.evolve() }
+    neats.forEach { it.evolve() }
     val runningScoreBoard = mutableMapOf(Pair(team1, 0), Pair(team2, 0))
 
     var count = 0
@@ -36,7 +36,7 @@ fun main() {
         }
 
         neats[0].printSpecies()
-        println("Gen $count: [${team1.teamName}: ${runningScoreBoard[team1] ?: 0} | ${runningScoreBoard[team2] ?: 0} :${team2.teamName}]")
+//        println("Gen $count: [${team1.teamName}: ${runningScoreBoard[team1] ?: 0} | ${runningScoreBoard[team2] ?: 0} :${team2.teamName}]")
 
         neats.forEach { it.evolve() }
     }

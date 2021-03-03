@@ -67,8 +67,8 @@ open class Neat(inputNodeCount: Int, outputNodeCount: Int, private var maxGenome
         protected set
 
     init {
-        repeat(inputNodeCount) { inputNodes.add(newNode(0.1, it / inputNodeCount.toDouble(), NodeGene.Type.INPUT)) }
-        repeat(outputNodeCount) { outputNodes.add(newNode(0.9, it / outputNodeCount.toDouble(), NodeGene.Type.OUTPUT)) }
+        repeat(inputNodeCount) { inputNodes.add(newNode(0.0, it / inputNodeCount.toDouble(), NodeGene.Type.INPUT)) }
+        repeat(outputNodeCount) { outputNodes.add(newNode(1.0, it / outputNodeCount.toDouble(), NodeGene.Type.OUTPUT)) }
         repeat(maxGenomes) { genomes.add(Genome(this)) }
     }
 

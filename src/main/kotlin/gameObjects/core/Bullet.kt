@@ -27,7 +27,7 @@ class Bullet(private val source: Dood, override var position: Vector2, private v
 
     override fun render(g: Graphics) {
         g.color = Color.darkGray
-        g.fillOval(position.x.toInt(), position.y.toInt(), 4, 4)
+        g.fillOval(position.x.toInt() - 2, position.y.toInt() - 2, 5, 5)
 //        g.drawLine(position.x.toInt(), position.y.toInt(), (position.x + velocity.x).toInt(), (position.y + velocity.y).toInt())
     }
 }
