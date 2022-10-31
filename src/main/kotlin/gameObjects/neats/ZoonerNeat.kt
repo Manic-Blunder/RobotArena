@@ -2,13 +2,13 @@ package gameObjects.neats
 
 import brains.neat.Neat
 
-class ZoonerNeat(maxGenomes: Int, minGenomes: Int) : Neat(19, 4, maxGenomes, minGenomes) {
+class ZoonerNeat(maxGenomes: Int, minGenomes: Int) : Neat(19, 0, 0, 4, maxGenomes, minGenomes) {
     init {
         breedingType = BreedType.ALPHA
 
         //        Differential weights
         disjointCoefficient = 1.0 // how much mismatched connections count against genome similarity
-        excessCoefficient = 1.0 // how much excess connections count against genome similarity
+        excessCoefficient = 0.50 // how much excess connections count against genome similarity
         deltaWeightCoefficient = 1.0 // how much connection weight variance counts against genome similarity
 
         //        Mutation values (1.0 is 100% chance per evolution)
@@ -18,7 +18,7 @@ class ZoonerNeat(maxGenomes: Int, minGenomes: Int) : Neat(19, 4, maxGenomes, min
         mutateRandomWeightChance = 0.0 // chance to completely randomize the weight of a connection
         mutateToggleConnectionChance = 0.1 // chance to disable/enable a connection. Connections are initially enabled
         mutateDropNodeChance = 0.2  // chance to drop a node (and all associated connections)
-        mutateDropConnectionChance = 0.6 // chance to drop a connection
+        mutateDropConnectionChance = 0.4 // chance to drop a connection
         weightShiftPower = 0.1 // how much the weight can shift
         weightRandomPower = 0.0 // range of the new weight
         mutationRate = 1 // number of attempted mutations per genome per cycle

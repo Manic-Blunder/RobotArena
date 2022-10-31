@@ -12,7 +12,7 @@ class Species(val neat: Neat, var representative: Genome) {
     }
 
     fun put(genome: Genome): Boolean {
-        if (genome.distanceFrom(representative) < neat.speciesFault + representative.neat.species.size) {
+        if (genome.similarityTo(representative) >= neat.speciesFault + (representative.neat.species.size - 1)) {
             genome.species = this
             genomes.add(genome)
             return true
@@ -44,12 +44,7 @@ class Species(val neat: Neat, var representative: Genome) {
         if (size <= 1) goExtinct()
     }
 
-    fun breed(): Genome {
-        return when (neat.breedingType) {
-            Neat.BreedType.RANDOM -> randomBreed()
-            Neat.BreedType.ALPHA -> alphaBreed() ?: randomBreed()
-        }
-    }
+
 
     private fun randomBreed(): Genome {
         val first = genomes.random()

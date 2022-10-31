@@ -2,7 +2,7 @@ package gameObjects.neats
 
 import brains.neat.Neat
 
-class GreenNeat(maxGenomes: Int, minGenomes: Int) : Neat(64, 4, maxGenomes, minGenomes) {
+class GreenNeat(maxGenomes: Int, minGenomes: Int) : Neat(64, 32, 16, 4, maxGenomes, minGenomes) {
     //output nodes = length of output array
     //input how many inputs to the neat algorithm
     init {

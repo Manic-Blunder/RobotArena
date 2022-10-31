@@ -74,7 +74,6 @@ class Arena(genomes: List<Pair<Genome, Genome>>, private val team1: Team, privat
     }
 
     fun render(g: Graphics) {
-
         if (GameScreen.renderSpecial) {
             bestDude?.specialRender(g)
         }

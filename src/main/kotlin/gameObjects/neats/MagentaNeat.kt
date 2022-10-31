@@ -2,7 +2,7 @@ package gameObjects.neats
 
 import brains.neat.Neat
 
-class MagentaNeat(maxGenomes: Int, minGenomes: Int) : Neat(19, 7, maxGenomes, minGenomes) {
+class MagentaNeat(maxGenomes: Int, minGenomes: Int) : Neat(19, 15, 11,7, maxGenomes, minGenomes) {
     init {
         breedingType = BreedType.ALPHA
 

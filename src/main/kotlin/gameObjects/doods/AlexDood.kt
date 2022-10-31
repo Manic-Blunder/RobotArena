@@ -2,16 +2,14 @@ package gameObjects.doods
 
 
 import brains.neat.Genome
-import brains.neat.NodeGene
+import brains.neat.Node
 import fuzzyMath.*
 import fuzzyMath.shapes.Line
 import fuzzyMath.shapes.Vector2
 import gameObjects.core.*
 import gameObjects.peripherals.SightRay
 import java.awt.Graphics
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.max
+import kotlin.math.*
 
 
 class AlexDood(arena: Arena, genome: Genome, position: Vector2) : Dood(arena, position, Team.ALEX, genome) {
@@ -117,26 +115,59 @@ class AlexDood(arena: Arena, genome: Genome, position: Vector2) : Dood(arena, po
         commandThreshold = myOutputs[4]
     }
 
-    override fun afterMove() {
-        moveTarget -= relativeVelocity / dragMultiplier
-        rotateTarget -= rotationalVelocity / rotationalDragMultiplier
+    override fun afterUpdate() {
+        val gunPosition = Vector2(
+            (position.x + 27 * cos(angle + 12 * PI / 180)),
+            (position.y + 27 * sin(angle + 12 * PI / 180))
+        )
+
+        val raysult = SightRay(this, gunPosition, angle, 4.0, 150).cast()
+
+        if (raysult.second == 1.0) {
+            score += 0.03
+        }
     }
 
     override fun onKill(victim: Dood) {
-        score += 5
+        score += 20
     }
 
     override fun onBetrayal(victim: Dood) {
         score -= 5
     }
 
+    override fun onKilled(killer: Dood) {
+        score -= 2
+    }
+
     override fun onWin(teamScores: Pair<Int, Int>) {
-//        score += 10
+        score += 10
+    }
+
+    override fun afterFireCommand() {
+        if (isFiring) {
+            val gunPosition = Vector2(
+                (position.x + 27 * cos(angle + 12 * PI / 180)),
+                (position.y + 27 * sin(angle + 12 * PI / 180))
+            )
+
+            val raysult = SightRay(this, gunPosition, angle, 4.0, 150).cast()
+
+            if (raysult.second == 1.0) {
+                score += 5
+            }
+        }
+    }
+
+    override fun afterMove() {
+        moveTarget -= relativeVelocity / dragMultiplier
+        rotateTarget -= rotationalVelocity / rotationalDragMultiplier
+        if( dizziness > 50) {
+            score--
+        }
     }
 
     override fun recalculateGenomeScore() {
-        // this should promote being efficient with nodes instead of having tons of useless nodes
-        val nodeCount = max((genome.nodes.filter { it.type == NodeGene.Type.HIDDEN }).count() - 30,0)
-        genome.score = score - nodeCount
+        genome.score = score
     }
 }

@@ -1,211 +1,91 @@
 package brains.neat
 
 import brains.neat.calculations.Calculator
+import fuzzyMath.sigmoid
+import java.awt.RadialGradientPaint
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.random.Random
 
-class Genome(val neat: Neat) : Comparable<Genome> {
+class Genome(val neat: Neat) {
     var species: Species? = null
     var score = 0.0
-    val weights = mutableSetOf<WeightGene>()
-    val nodes
-        get() = (weights.flatMap { listOf(it.from, it.to) } + neat.inputNodes + neat.outputNodes).toSet()
-    private val innovationNumber
-        get() = weights.lastOrNull()?.innovationNumber ?: 0
+    var weights = mutableMapOf<Pair<Node, Node>, Double>()
 
-    fun calculate(inputs: List<Double>): List<Double> = Calculator(this).calculate(inputs)
-
-    private fun addWeightGene(weightGene: WeightGene) {
-        if (weights.none { it.connection == weightGene.connection }) {
-            weights.add(weightGene)
-        }
+    fun calculate(inputs: List<Double>): List<Double> {
+        return Calculator(this).calculate(inputs)
     }
 
-    fun distanceFrom(other: Genome): Double {
-        if (innovationNumber < other.innovationNumber) return other.distanceFrom(this)
-        var i = 0
-        var j = 0
-        var disjoint = 0
-        var similar = 0
-        var deltaWeight = 0.0
+    private fun addWeightGene(toFrom: Pair<Node, Node>, weight: Double) {
+        weights[toFrom] = weight
+    }
 
-        val ourWeights = weights.sortedBy { it.innovationNumber }
-        val theirWeights = other.weights.sortedBy { it.innovationNumber }
+    fun similarityTo(other: Genome): Double {
+        var similar = 0.0
+        var shared = 0
 
-        while (i < ourWeights.size && j < theirWeights.size) {
-            val ourWeight = ourWeights[i]
-            val theirWeight = theirWeights[j]
-            when {
-                ourWeight.innovationNumber == theirWeight.innovationNumber -> {
-                    similar++
-                    deltaWeight += abs(ourWeight.weight - theirWeight.weight)
-                    i++
-                    j++
-                }
-                ourWeight.innovationNumber > theirWeight.innovationNumber -> {
-                    disjoint++
-                    j++
-                }
-                else -> {
-                    disjoint++
-                    i++
-                }
+        weights.forEach { ours ->
+            other.weights[ours.key]?.let { theirs ->
+                similar += (0.5 - abs(sigmoid(ours.value - sigmoid(theirs)))) * 5
+                shared += 1
             }
         }
 
-        val excess = ourWeights.size - i
-        val highestConnections = max(weights.size, other.weights.size)
-        val n = if (highestConnections > 20) 1 else 20
-        return neat.disjointCoefficient * disjoint / n + neat.excessCoefficient * excess / n + neat.deltaWeightCoefficient * deltaWeight
+        val excess = (weights.size - shared) + (other.weights.size - shared)
+        return max(similar - excess * neat.excessCoefficient, 1.0)
     }
 
     fun crossOver(other: Genome): Genome {
         val newGenome = Genome(neat)
-        var i = 0
-        var j = 0
-
-        val ourWeights = weights.sortedBy { it.innovationNumber }
-        val theirWeights = other.weights.sortedBy { it.innovationNumber }
-
-        while (i < ourWeights.size && j < theirWeights.size) {
-            val ourWeightGene = ourWeights[i]
-            val theirWeightGene = theirWeights[j]
-            when {
-                ourWeightGene.innovationNumber == theirWeightGene.innovationNumber -> {
-                    if (Math.random() > 0.5) {
-                        newGenome.addWeightGene(WeightGene(ourWeightGene.connection, ourWeightGene.weight, ourWeightGene.inverted))
-                    } else {
-                        newGenome.addWeightGene(WeightGene(theirWeightGene.connection, theirWeightGene.weight, theirWeightGene.inverted))
-                    }
-                    i++
-                    j++
-                }
-                ourWeightGene.innovationNumber > theirWeightGene.innovationNumber -> {
-                    if (Math.random() > 0.5) {
-                        newGenome.addWeightGene(WeightGene(theirWeightGene.connection, theirWeightGene.weight, theirWeightGene.inverted))
-                    }
-                    j++
-                }
-                else -> {
-                    if (Math.random() > 0.5) {
-                        newGenome.addWeightGene(WeightGene(ourWeightGene.connection, ourWeightGene.weight, ourWeightGene.inverted))
-                    }
-                    i++
-                }
+        weights.forEach { weight ->
+            val otherWeight = other.weights[weight.key]
+            if(otherWeight != null || Random.nextBoolean()) {
+                newGenome.weights[weight.key] = weight.value
             }
         }
-
-        while (i < weights.size) {
-            ourWeights[i].let { weightGene ->
-                newGenome.addWeightGene(WeightGene(weightGene.connection, weightGene.weight, weightGene.inverted))
+        other.weights.forEach { weight ->
+            if(Random.nextBoolean()) {
+                newGenome.weights[weight.key] = weight.value
             }
-            i++
         }
-//
-        while (j < theirWeights.size) {
-            theirWeights[j].let { weightGene ->
-                newGenome.addWeightGene(WeightGene(weightGene.connection, weightGene.weight, weightGene.inverted))
-            }
-            j++
-        }
-
         return newGenome
     }
 
     fun mutate() {
-        if (neat.mutateDropNodeChance > Math.random()) mutateDropNode()
         if (neat.mutateDropConnectionChance > Math.random()) mutateDropConnection()
-        if (neat.mutateConnectionChance > Math.random()) mutateNewConnection(null)
-        if (neat.mutateNodeChance > Math.random()) mutateNewNode()
+        if (neat.mutateConnectionChance > Math.random()) mutateNewConnection()
         if (neat.mutateRandomWeightChance > Math.random()) mutateRandomizeConnectionWeight()
         if (neat.mutateShiftWeightChance > Math.random()) mutateShiftConnectionWeight()
-        if (neat.mutateToggleConnectionChance > Math.random()) mutateToggleConnection()
     }
 
-    private fun mutateNewConnection(nodeGene: NodeGene?) {
-        for (i in (0 until 100)) {
-            val nodeA = nodes.randomOrNull()
-//            val nodeB = nodeGene ?: if (Math.random() > 0.4) nodes.randomOrNull() else nodes.filter { it.type == NodeGene.Type.OUTPUT }.randomOrNull()
-            val nodeB = nodeGene ?: nodes.randomOrNull()
-            if (nodeA != null && nodeB != null) {
-                if (nodeA.x == nodeB.x) {
-                    continue
-                } else {
-                    val from = if (nodeA.x < nodeB.x) nodeA else nodeB
-                    val to = if (nodeA.x < nodeB.x) nodeB else nodeA
-                    val existingConnection = neat.connections.firstOrNull { it.from == from && it.to == to }
-                    if (existingConnection == null) {
-                        addWeightGene(WeightGene(neat.getConnection(from, to), (Math.random() * 2 - 1), Random.nextBoolean()))
-                        return
-                    } else {
-                        if (weights.none { it.connection == existingConnection }) {
-                            addWeightGene(WeightGene(existingConnection, (Math.random() * 2 - 1) * neat.weightRandomPower, Random.nextBoolean()))
-                            return
-                        } else {
-                            continue
-                        }
-                    }
-                }
+    private fun mutateNewConnection() {
+        (neat.inputNodes + neat.firstHiddenLayer + neat.secondHiddenNodeLayer).randomOrNull()?.let { leftNode ->
+            val rightNodes = when (leftNode.type) {
+                Node.Type.INPUT -> neat.firstHiddenLayer + neat.secondHiddenNodeLayer + neat.outputNodes
+                Node.Type.FIRST_HIDDEN -> neat.secondHiddenNodeLayer + neat.outputNodes
+                Node.Type.SECOND_HIDDEN -> neat.outputNodes
+                Node.Type.OUTPUT -> mutableSetOf()
             }
-        }
-    }
-
-    private fun mutateNewNode() {
-        val nodeMod = nodes.size / neat.maxNodes.toFloat()
-        if (nodeMod < Math.random()) {
-            weights.randomOrNull()?.let { weightGene ->
-                val connection = weightGene.connection
-
-                val potentialExistingMiddleNodes = neat.connections.filter { it.from == weightGene.from }.map { it.to }
-                val existingMiddleConnection = neat.connections.firstOrNull { it.to == weightGene.to && it.from in potentialExistingMiddleNodes }
-                val middle = existingMiddleConnection?.from ?: neat.newNode((connection.from.x + connection.to.x) / 2.0, (connection.from.y + connection.to.y) / 2.0, NodeGene.Type.HIDDEN)
-
-                addWeightGene(WeightGene(neat.getConnection(connection.from, middle), 1.0, true))
-                addWeightGene(WeightGene(neat.getConnection(middle, connection.to), weightGene.weight, weightGene.inverted))
-                weights.remove(weightGene)
-                mutateNewConnection(middle)
+            rightNodes.randomOrNull()?.let { rightNode ->
+                weights[Pair(leftNode, rightNode)] = (Math.random() * 2 - 1) * neat.weightRandomPower
             }
         }
     }
 
     private fun mutateShiftConnectionWeight() {
-        weights.randomOrNull()?.let {
-            weights.remove(it)
-            addWeightGene(WeightGene(it.connection, it.weight + (Math.random() * 2 - 1) * neat.weightShiftPower, it.inverted))
+        weights.keys.randomOrNull()?.let { key ->
+            weights[key]?.let { currentWeight ->
+                weights[key] = currentWeight + (Math.random() * 2 - 1) * neat.weightShiftPower
+            }
         }
     }
 
     private fun mutateRandomizeConnectionWeight() {
-        weights.randomOrNull()?.let {
-            weights.remove(it)
-            addWeightGene(WeightGene(it.connection, (Math.random() * 2 - 1) * neat.weightRandomPower, it.inverted))
-        }
-    }
-
-    private fun mutateToggleConnection() {
-        weights.randomOrNull()?.let {
-            weights.remove(it)
-            addWeightGene(WeightGene(it.connection, it.weight, !it.inverted))
-        }
+        weights.keys.randomOrNull()?.let { weights[it] = (Math.random() * 2 - 1) * neat.weightRandomPower }
     }
 
     private fun mutateDropConnection() {
-        weights.randomOrNull()?.let {
-            weights.remove(it)
-        }
-    }
-
-    private fun mutateDropNode() {
-//        nodes.filter { it.type == NodeGene.Type.HIDDEN }.randomOrNull()?.let { node -> weights.removeIf { weight -> weight.from == node || weight.to == node } }
-    }
-
-    override fun compareTo(other: Genome): Int {
-        return when {
-            other.innovationNumber > innovationNumber -> -1
-            other.innovationNumber < innovationNumber -> 1
-            else -> 0
-        }
+        weights.keys.randomOrNull()?.let { weights.remove(it) }
     }
 }

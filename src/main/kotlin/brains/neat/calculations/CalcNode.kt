@@ -2,11 +2,11 @@ package brains.neat.calculations
 
 import kotlin.math.exp
 
-class Node(val x: Double) {
+class CalcNode(val x: Double) {
     var output: Double = 0.0
-    var connections = arrayListOf<Connection>()
+    var connectionsTo = arrayListOf<Connection>()
     val weightedOutput
-        get() = connections.sumByDouble { it.weight * (it.output) }
+        get() = connectionsTo.sumByDouble { it.weight * (it.output) }
 
     fun recalculate(): Double {
         output = sigmoid(weightedOutput)

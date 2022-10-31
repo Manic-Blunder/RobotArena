@@ -56,21 +56,23 @@ object GameScreen : JPanel() {
         val y = height - 300
         genome.weights.forEach { weight ->
             g.color = when {
-                weight.weight > 0 && weight.inverted -> Color.GREEN
-                weight.weight > 0 && !weight.inverted -> Color.MAGENTA
-                weight.weight < 0 && weight.inverted -> Color.RED
-                weight.weight < 0 && !weight.inverted -> Color.CYAN
+//                weight.value > 0 && weight.inverted -> Color.GREEN
+//                weight.value > 0 && !weight.inverted -> Color.MAGENTA
+//                weight.value < 0 && weight.inverted -> Color.RED
+//                weight.value < 0 && !weight.inverted -> Color.CYAN
+                weight.value > 0 -> Color.GREEN
+                weight.value < 0 -> Color.RED
                 else -> Color.BLACK
             }
             g.drawLine(
-                (x + weight.from.x * ((GameScreen.width - x) - 100)).toInt(),
-                y + (weight.from.y * 280.0).toInt() + 20,
-                (x + weight.to.x * ((GameScreen.width - 2 * x) - 100)).toInt(),
-                y + (weight.to.y * 280.0).toInt() + 20,
+                (x + weight.key.first.x * ((GameScreen.width - x) - 100)).toInt(),
+                y + (weight.key.first.y * 280.0).toInt() + 20,
+                (x + weight.key.second.x * ((GameScreen.width - 2 * x) - 100)).toInt(),
+                y + (weight.key.second.y * 280.0).toInt() + 20,
             )
         }
         g.color = Color.DARK_GRAY
-        genome.nodes.forEach { node ->
+        genome.neat.nodes.forEach { node ->
             g.fillOval(
                 (x + node.x * ((GameScreen.width - 2 * x) - 100)).toInt() - 3,
                 y + (node.y * 280.0).toInt() + 20 - 4,

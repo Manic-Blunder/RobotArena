@@ -1,44 +1,58 @@
 package brains.neat.calculations
 
 import brains.neat.Genome
-import fuzzyMath.sigmoid
+import brains.neat.Node
 
 class Calculator(genome: Genome) {
-    val inputNodes = arrayListOf<Node>()
-    val hiddenNodes = arrayListOf<Node>()
-    val outputNodes = arrayListOf<Node>()
+    val inputNodes = arrayListOf<CalcNode>()
+    val firstHiddenNodes = arrayListOf<CalcNode>()
+    val secondHiddenNodes = arrayListOf<CalcNode>()
+    val outputNodes = arrayListOf<CalcNode>()
 
     init {
-        val nodeHash = hashMapOf<Int, Node>()
+        val nodeHash = hashMapOf<Node, CalcNode>()
 
         // TODO: 12/27/2020 replace this with better determination of input/output nodes
-        genome.nodes.forEach {
-            val newNode = Node(it.x)
-            nodeHash[it.innovationNumber] = newNode
-            when {
-                newNode.x <= 0.1 -> inputNodes.add(newNode)
-                newNode.x >= 0.9 -> outputNodes.add(newNode)
-                else -> hiddenNodes.add(newNode)
-            }
+        genome.neat.inputNodes.forEach {
+            val newNode = CalcNode(it.x)
+            nodeHash[it] = newNode
+            inputNodes.add(newNode)
         }
 
-        hiddenNodes.sortBy { it.x }
+        genome.neat.firstHiddenLayer.forEach {
+            val newNode = CalcNode(it.x)
+            nodeHash[it] = newNode
+            firstHiddenNodes.add(newNode)
+        }
+
+        genome.neat.secondHiddenNodeLayer.forEach {
+            val newNode = CalcNode(it.x)
+            nodeHash[it] = newNode
+            secondHiddenNodes.add(newNode)
+        }
+
+        genome.neat.outputNodes.forEach {
+            val newNode = CalcNode(it.x)
+            nodeHash[it] = newNode
+            outputNodes.add(newNode)
+        }
 
         genome.weights.forEach {
-            val nodeFrom = nodeHash[it.from.innovationNumber]
-            val nodeTo = nodeHash[it.to.innovationNumber]
+            val nodeFrom = nodeHash[it.key.first]
+            val nodeTo = nodeHash[it.key.second]
             if (nodeTo != null && nodeFrom != null) {
-                val newConnection = Connection(nodeFrom, nodeTo, 0) // TODO: 12/27/2020 Innovation Number
-                newConnection.weight = it.weight
-                newConnection.inverted = it.inverted
-                nodeTo.connections.add(newConnection)
+                val newConnection = Connection(nodeFrom, nodeTo) // TODO: 12/27/2020 Innovation Number
+                newConnection.weight = it.value
+                newConnection.inverted = false // it.inverted
+                nodeTo.connectionsTo.add(newConnection)
             }
         }
     }
 
     fun calculate(inputs: List<Double>): List<Double> {
         (inputNodes zip inputs).forEach { it.first.output = it.second }
-        hiddenNodes.forEach { it.recalculate() }
-        return outputNodes.map(Node::recalculate)
+        firstHiddenNodes.forEach { it.recalculate() }
+        secondHiddenNodes.forEach { it.recalculate() }
+        return outputNodes.map(CalcNode::recalculate)
     }
 }

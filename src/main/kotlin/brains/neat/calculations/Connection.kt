@@ -1,8 +1,6 @@
 package brains.neat.calculations
 
-import brains.neat.Gene
-
-class Connection(val from: Node, val to: Node, innovationNumber: Int) : Gene(innovationNumber) {
+class Connection(val from: CalcNode, val to: CalcNode) {
     var weight = 0.0
     var inverted = true
     val output

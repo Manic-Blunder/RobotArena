@@ -11,7 +11,7 @@ class WeightedRandomSelector<T> {
         scores.add(score)
     }
 
-    fun select(): T? {
+    fun select(): T {
         val value = Math.random() * totalScore
         var count = 0.0
         (0 until objects.size).forEach { i ->
@@ -21,6 +21,6 @@ class WeightedRandomSelector<T> {
                 return objects[i]
             }
         }
-        return objects[0]
+        return objects.first()
     }
 }
