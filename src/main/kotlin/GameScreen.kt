@@ -54,14 +54,14 @@ object GameScreen : JPanel() {
     private fun renderGenome(g: Graphics, genome: Genome) {
         val x = 10
         val y = height - 300
-        genome.weights.forEach { weight ->
+        genome.connections.forEach { weight ->
             g.color = when {
-//                weight.value > 0 && weight.inverted -> Color.GREEN
-//                weight.value > 0 && !weight.inverted -> Color.MAGENTA
-//                weight.value < 0 && weight.inverted -> Color.RED
-//                weight.value < 0 && !weight.inverted -> Color.CYAN
-                weight.value > 0 -> Color.GREEN
-                weight.value < 0 -> Color.RED
+                weight.value.weight > 0 && weight.value.inverted -> Color.GREEN
+                weight.value.weight > 0 && !weight.value.inverted -> Color.MAGENTA
+                weight.value.weight < 0 && weight.value.inverted -> Color.RED
+                weight.value.weight < 0 && !weight.value.inverted -> Color.CYAN
+//                weight.value.weight > 0 -> Color.GREEN
+//                weight.value.weight < 0 -> Color.RED
                 else -> Color.BLACK
             }
             g.drawLine(

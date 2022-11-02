@@ -37,14 +37,14 @@ class Calculator(genome: Genome) {
             outputNodes.add(newNode)
         }
 
-        genome.weights.forEach {
+        genome.connections.forEach {
             val nodeFrom = nodeHash[it.key.first]
             val nodeTo = nodeHash[it.key.second]
             if (nodeTo != null && nodeFrom != null) {
-                val newConnection = Connection(nodeFrom, nodeTo) // TODO: 12/27/2020 Innovation Number
-                newConnection.weight = it.value
-                newConnection.inverted = false // it.inverted
-                nodeTo.connectionsTo.add(newConnection)
+                val newCalcConnection = CalcConnection(nodeFrom, nodeTo) // TODO: 12/27/2020 Innovation Number
+                newCalcConnection.weight = it.value.weight
+                newCalcConnection.inverted = it.value.inverted
+                nodeTo.connectionsTo.add(newCalcConnection)
             }
         }
     }

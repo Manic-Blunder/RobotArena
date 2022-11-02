@@ -4,7 +4,7 @@ import kotlin.math.exp
 
 class CalcNode(val x: Double) {
     var output: Double = 0.0
-    var connectionsTo = arrayListOf<Connection>()
+    var connectionsTo = arrayListOf<CalcConnection>()
     val weightedOutput
         get() = connectionsTo.sumByDouble { it.weight * (it.output) }
 

@@ -4,9 +4,9 @@ import gameObjects.core.Team.*
 fun main() {
     GameFrame
 
-    val team1 = ALEX
-    val team2 = ZOONER
-    val maxGenomes = 120
+    val team1 = ZOONER
+    val team2 = MAGENTA
+    val maxGenomes = 240
 
     val neats = listOf(team1.newNeat(maxGenomes, 20), team2.newNeat(maxGenomes, 20))
     neats.forEach { it.evolve() }

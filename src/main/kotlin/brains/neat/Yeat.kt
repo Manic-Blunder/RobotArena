@@ -100,7 +100,7 @@ fun main() {
     val nodesGenes = mutableSetOf<Node>()
     clientGenomes.forEach { genome ->
         genome.neat.nodes.forEach { node ->
-            if (genome.weights.any { connection -> connection.key.first == node }) liveNodeGenes.add(node)
+            if (genome.connections.any { connection -> connection.key.first == node }) liveNodeGenes.add(node)
             nodesGenes.add(node)
         }
     }

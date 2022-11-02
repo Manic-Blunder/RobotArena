@@ -1,6 +1,6 @@
 package brains.neat.calculations
 
-class Connection(val from: CalcNode, val to: CalcNode) {
+class CalcConnection(val from: CalcNode, val to: CalcNode) {
     var weight = 0.0
     var inverted = true
     val output

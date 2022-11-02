@@ -82,6 +82,7 @@ open class Neat(inputNodeCount: Int, firstHiddenLayerCount: Int, secondHiddenLay
         cull()
         reproduce()
         mutate()
+        prepare()
     }
 
     private fun resetSpecies() = species.forEach(Species::reset)
@@ -113,6 +114,10 @@ open class Neat(inputNodeCount: Int, firstHiddenLayerCount: Int, secondHiddenLay
             val female = mateSelector.select()
             genomes.add(male.crossOver(female))
         }
+    }
+
+    private fun prepare() {
+        genomes.forEach { it.rebuildCalculations() }
     }
 
     private fun mutate() = genomes.forEach { it.mutate() }
